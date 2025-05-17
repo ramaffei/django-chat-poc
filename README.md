@@ -39,11 +39,26 @@ Este proyecto es una aplicación de chat en tiempo real utilizando Django, Djang
    POSTGRES_HOST=db
    POSTGRES_PORT=5432
    ```
-## Uso con Docker
-
-1. Construir e iniciar los servicios:
+4. Uso con Docker
+  Construir e iniciar los servicios:
    ```bash
    docker-compose up --build
+
+### CRUD de Salas de Chat
+
+- Se creó la aplicación Django `rooms` para manejar la lógica de las salas de chat.
+- Se agregó la app `rooms` al archivo de configuración `INSTALLED_APPS` en `settings.py`.
+- Se creó el modelo `Room` con los campos: `name`, `description`, `created_at`.
+- Se aplicaron migraciones para crear la tabla en la base de datos PostgreSQL.
+- Se registró el modelo en el panel de administración para permitir gestión manual de salas.
+- Se creó el archivo `rooms/serializers.py`.
+- Se definió la clase `RoomSerializer` utilizando `ModelSerializer`.
+- Se expusieron los campos: `id`, `name`, `description`, `created_at`, siendo `id` y `created_at` de solo lectura.
+- Se implementó un `RoomViewSet` con `ModelViewSet` de DRF.
+- Se aplicó un permiso personalizado `IsAdminOrReadOnly`.
+- Se configuraron rutas REST con `DefaultRouter`.
+- Los endpoints permiten listar a cualquier usuario.
+- Solo usuarios autenticados con `is_staff=True` pueden crear, editar o eliminar salas.
 
 ## Estructura del proyecto
 
@@ -62,3 +77,11 @@ Para manejar la configuración sensible (como credenciales de la base de datos),
 - No acopla la configuración al entorno de desarrollo.
 - Es una solución simple, clara y Pythonic.
 - A diferencia de soluciones más complejas como `django-environ`, `decouple` es liviano y rápido de configurar, ideal para pruebas técnicas y proyectos pequeños.
+
+## Entorno y configuración
+
+La aplicación se comporta distinto según la variable `ENVIRONMENT`. Los valores posibles son:
+
+- `Local`: entorno de desarrollo local. Acceso total al admin (`/admin`), con archivos estáticos.
+- `DEV`: entorno de desarrollo con Docker. Admin habilitado, archivos estáticos disponibles.
+- `STG` y `PRD`: entornos de staging o producción. Se deshabilita por completo la vista `/admin`, y todas las rutas que no comienzan con `/api/` devolverán un JSON `404`.
