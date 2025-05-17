@@ -85,3 +85,16 @@ La aplicación se comporta distinto según la variable `ENVIRONMENT`. Los valore
 - `Local`: entorno de desarrollo local. Acceso total al admin (`/admin`), con archivos estáticos.
 - `DEV`: entorno de desarrollo con Docker. Admin habilitado, archivos estáticos disponibles.
 - `STG` y `PRD`: entornos de staging o producción. Se deshabilita por completo la vista `/admin`, y todas las rutas que no comienzan con `/api/` devolverán un JSON `404`.
+
+### Endpoints: Salas de Chat
+
+- `GET /api/rooms/`: Listar todas las salas (público)
+- `POST /api/rooms/`: Crear una nueva sala (requiere autenticación y permisos de administrador)
+
+## 🔐 Autenticación de administrador (Bearer Token)
+
+Las operaciones de crear, editar y eliminar salas requieren autenticación.
+
+Para obtener un token:
+```bash
+curl -X POST -d "username=admin&password=admin123" http://localhost:8000/api/token/
