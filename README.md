@@ -1,116 +1,142 @@
-# Chat App - Prueba Técnica
+# 💬 Chat App - Prueba Técnica
 
-Este proyecto es una aplicación de chat en tiempo real utilizando Django, Django REST Framework y Channels. La base de datos utilizada es PostgreSQL y la comunicación en tiempo real se gestiona con WebSockets a través de Django Channels y Redis.
+Aplicación de chat en tiempo real desarrollada con Django, Django REST Framework, Channels, WebSockets y PostgreSQL. Redis se utiliza como backend de Channel Layers.
 
-## Progreso
+---
 
-- [x] Crear proyecto Django (commit inicial)
-- [x] Instalar paquetes necesarios
-- [x] Configurar PostgreSQL
-- [x] Configurar Docker y Docker Compose
-- [ ] Implementar CRUD para salas de chat
-- [ ] Configurar websockets con Channels
-- [ ] Crear interfaz simple para acceder a salas y chatear
+## 🚀 Tecnologías
 
-## Requisitos
-
-- Python 3.10+
-- Virtualenv (`venv`)
+- Django 5.x
+- Django REST Framework
+- Django Channels
+- WebSockets
+- PostgreSQL
+- Redis
 - Docker + Docker Compose
 
-## Instalación y configuración inicial
+---
 
-1. Crear y activar entorno virtual:
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate  # En Windows
-   ```
+## 📁 Estructura
+
+- `chat_project/`: Configuración principal Django.
+- `rooms/`: Módulo para gestionar salas de chat (modelo, API REST).
+- `chat/`: Funcionalidad WebSocket (consumidores, lógica de chat).
+- `templates/`: Frontend HTML renderizado por Django.
+- `static/`: Archivos JS y CSS.
+- `docker-compose.yml`: Configuración de contenedores.
+
+---
+
+## ⚙️ Variables de entorno (.env)
+
+Ejemplo de `.env`:
+
+```env
+POSTGRES_DB=chat_db
+POSTGRES_USER=chat_user
+POSTGRES_PASSWORD=chat_password
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+
+ENVIRONMENT=Local  # Opciones: Local, DEV, STG, PRD
+```
+
+---
+
+## 🐳 Uso con Docker
+
+1. Crear `.env` en la raíz (ver arriba).
+2. Construir e iniciar:
+
+```bash
+docker compose up --build
+```
+3. Con el contenedor iniciado migrar las base de datos:
+```bash
+docker compose exec web python manage.py migrate
+```
+> Luego accedé a la app en: [http://localhost:8000](http://localhost:8000)
+
+---
+
+## 💻 Uso con entorno virtual (`venv`)
+
+1. Crear y activar entorno:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate   # Windows
+```
 
 2. Instalar dependencias:
-   ```bash
-   pip install -r requirements.txt
-   ```
 
-3. Crear archivo `.env` en la raíz del proyecto con el siguiente contenido:
-   ```env
-   POSTGRES_DB=chat_db
-   POSTGRES_USER=chat_user
-   POSTGRES_PASSWORD=chat_password
-   POSTGRES_HOST=db
-   POSTGRES_PORT=5432
-   ```
-4. Uso con Docker
-  Construir e iniciar los servicios:
-   ```bash
-   docker-compose up --build
-
-### CRUD de Salas de Chat
-
-- Se creó la aplicación Django `rooms` para manejar la lógica de las salas de chat.
-- Se agregó la app `rooms` al archivo de configuración `INSTALLED_APPS` en `settings.py`.
-- Se creó el modelo `Room` con los campos: `name`, `description`, `created_at`.
-- Se aplicaron migraciones para crear la tabla en la base de datos PostgreSQL.
-- Se registró el modelo en el panel de administración para permitir gestión manual de salas.
-- Se creó el archivo `rooms/serializers.py`.
-- Se definió la clase `RoomSerializer` utilizando `ModelSerializer`.
-- Se expusieron los campos: `id`, `name`, `description`, `created_at`, siendo `id` y `created_at` de solo lectura.
-- Se implementó un `RoomViewSet` con `ModelViewSet` de DRF.
-- Se aplicó un permiso personalizado `IsAdminOrReadOnly`.
-- Se configuraron rutas REST con `DefaultRouter`.
-- Los endpoints permiten listar a cualquier usuario.
-- Solo usuarios autenticados con `is_staff=True` pueden crear, editar o eliminar salas.
-
-## Estructura del proyecto
-
-- `chat_project/`: Configuración principal de Django.
-- `requirements.txt`: Dependencias del proyecto.
-- `.env`: Variables de entorno (no se sube al repositorio).
-- `manage.py`: Script para ejecutar comandos de Django.
-
-## Sobre el uso de `decouple`
-
-Para manejar la configuración sensible (como credenciales de la base de datos), se utiliza la librería [`python-decouple`](https://github.com/henriquebastos/python-decouple).
-
-**Ventajas de usar `decouple`:**
-
-- Mantiene las variables sensibles fuera del código fuente.
-- No acopla la configuración al entorno de desarrollo.
-- Es una solución simple, clara y Pythonic.
-- A diferencia de soluciones más complejas como `django-environ`, `decouple` es liviano y rápido de configurar, ideal para pruebas técnicas y proyectos pequeños.
-
-## Entorno y configuración
-
-La aplicación se comporta distinto según la variable `ENVIRONMENT`. Los valores posibles son:
-
-- `Local`: entorno de desarrollo local. Acceso total al admin (`/admin`), con archivos estáticos.
-- `DEV`: entorno de desarrollo con Docker. Admin habilitado, archivos estáticos disponibles.
-- `STG` y `PRD`: entornos de staging o producción. Se deshabilita por completo la vista `/admin`, y todas las rutas que no comienzan con `/api/` devolverán un JSON `404`.
-
-### Endpoints: Salas de Chat
-
-- `GET /api/rooms/`: Listar todas las salas (público)
-- `POST /api/rooms/`: Crear una nueva sala (requiere autenticación y permisos de administrador)
-- `PUT /api/rooms/{id}/`: Reemplaza completamente la sala indicada (requiere Bearer token de admin)
-- `PATCH /api/rooms/{id}/`: Actualiza campos parciales de la sala (requiere Bearer token de admin)
-- `DELETE /api/rooms/{id}/`: Elimina la sala (requiere Bearer token de admin)
-
-
-## Funcionalidad de Chat en Tiempo Real (WebSockets)
-
-Se utilizó `Django Channels` para permitir comunicación WebSocket en tiempo real. Redis actúa como broker para las capas de canalización (Channel Layers).
-
-Pasos clave:
-- Se creó la app `chat` con un consumidor asíncrono (`ChatConsumer`)
-- Los usuarios se conectan por WebSocket a una sala: `ws://localhost:8000/ws/chat/<room_name>/`
-- Los mensajes se difunden en tiempo real solo a los usuarios de la misma sala
-- Redis se utiliza para manejar las conexiones concurrentes de los grupos
-
-Los mensajes no se almacenan en base de datos, sólo se transmiten mientras la conexión esté activa.
-
-## 🔐 Autenticación de administrador (Bearer Token)
-
-Las operaciones de crear, editar y eliminar salas requieren autenticación.
-
-Para obtener un token:
 ```bash
-   curl -X POST -d "username=admin&password=admin123" http://localhost:8000/api/token/
+pip install -r requirements.txt
+```
+3. Migrar base de datos:
+
+```bash
+python manage.py migrate
+```
+
+4. Iniciar servidor de desarrollo:
+
+```bash
+python manage.py runserver
+```
+
+---
+## 🔐 Seguridad Enpoint Salas
+
+- Se debe crear el usuario admin utilizando el comando 
+```bash
+python manage.py createsuperuser
+``` 
+ingresando username, email y passowrd
+- Se puede editar salas utilizando el panel de administracion [http://localhost:8000/admin](http://localhost:8000/admin)
+- Para los endpoints se debe solicitar un Bearer Token a /api/token con un json body con username y password 
+- 
+
+## ✅ Endpoints TOKEN (Admin)
+
+| Método | Endpoint             | Descripción                        |
+|--------|----------------------|-------------------------------------------------------|
+| POST    | `/api/token/`        | Solicitar Token de                        Acceso                            |
+---
+
+## ✅ Endpoints REST (Salas)
+
+| Método | Endpoint             | Descripción                        |
+|--------|----------------------|------------------------------------|
+| GET    | `/api/rooms/`        | Listar salas                       |
+| POST   | `/api/rooms/`        | Crear sala (admin con token)       |
+| PUT    | `/api/rooms/{id}/`   | Reemplazar sala (admin con token)  |
+| PATCH  | `/api/rooms/{id}/`   | Editar sala (admin con token)      |
+| DELETE | `/api/rooms/{id}/`   | Eliminar sala (admin con token)    |
+
+---
+
+
+## 📝 Frontend
+
+- Página inicial (`/`) para ingresar nombre de usuario y seleccionar una sala.
+- Vista tipo chat estilo WhatsApp: mensajes alineados a izquierda/derecha, con colores distintos.
+
+---
+
+## 🔐 Seguridad WebSocket
+
+- El `username` se guarda en `localStorage` y se envía como primer mensaje WebSocket (`type: "init"`).
+- El backend valida que el nombre no esté duplicado en la misma sala.
+- Las conexiones sin username válido o a salas inexistentes se rechazan.
+
+---
+
+## ✨ Autor
+
+Rodrigo Maffei.
+
+[Github](https://www.github.com/ramaffei)
+
+[Linkedin](https://www.linkedin.com/in/ramaffei)
