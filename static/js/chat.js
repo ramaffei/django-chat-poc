@@ -32,12 +32,11 @@ socket.onmessage = (event) => {
 };
 
 sendBtn.addEventListener('click', () => {
-    console.log(input)
-    console.log(input.value)
     const message = input.value.trim();
-    console.log(message)
-    console.log(socket)
-    console.log(username)
     send(socket, 'chat_message', message, username)
 });
-input.addEventListener('keydown', e => { if (e.key === 'Enter') send(socket, 'chat_message', message, username); });
+input.addEventListener('keydown', e => { if (e.key === 'Enter') {
+    const message = input.value.trim(); 
+    send(socket, 'chat_message', message, username);
+} 
+});

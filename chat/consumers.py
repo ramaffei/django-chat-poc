@@ -26,8 +26,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-    async def disconnect(self) -> None:
+    async def disconnect(self, close_code: str | None = None) -> None:
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        logger.info(
+            f"Desconectando el canal {self.channel_name} de la sala {self.room_group_name}, {close_code}"
+        )
         if self.username:
             await remove_user_from_room(self.room_id, self.username)
             await self.channel_layer.group_send(
