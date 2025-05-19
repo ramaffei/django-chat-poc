@@ -1,4 +1,4 @@
-# 💬 Chat App - Prueba Técnica
+# 💬 Chat App
 
 Aplicación de chat en tiempo real desarrollada con Django, Django REST Framework, Channels, WebSockets y PostgreSQL. Redis se utiliza como backend de Channel Layers.
 
