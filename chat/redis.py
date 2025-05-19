@@ -1,3 +1,4 @@
+from typing import Any, Set
 from django.conf import settings
 from redis.asyncio import Redis
 
@@ -8,7 +9,7 @@ async def get_redis() -> Redis:
     return Redis.from_url(REDIS_URL, decode_responses=True)
 
 
-async def add_user_to_room(room_id: int, username: str):
+async def add_user_to_room(room_id: int, username: str) -> None:
     redis = await get_redis()
     exists = await redis.sismember(f"room:{room_id}:users", username)
     if exists:
@@ -16,11 +17,11 @@ async def add_user_to_room(room_id: int, username: str):
     await redis.sadd(f"room:{room_id}:users", username)
 
 
-async def remove_user_from_room(room_id: int, username: str):
+async def remove_user_from_room(room_id: int, username: str) -> None:
     redis = await get_redis()
     await redis.srem(f"room:{room_id}:users", username)
 
 
-async def get_users_in_room(room_id: int):
+async def get_users_in_room(room_id: int) -> Set | Any:
     redis = await get_redis()
     return await redis.smembers(f"room:{room_id}:users")

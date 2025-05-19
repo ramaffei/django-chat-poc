@@ -1,10 +1,10 @@
-from django.db import models
+from django.db.models import CharField, DateTimeField, Model, TextField
 
 
-class Room(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+class Room(Model):
+    name: CharField = CharField(max_length=100, unique=True)
+    description: TextField = TextField(blank=True)
+    created_at: DateTimeField = DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return self.name

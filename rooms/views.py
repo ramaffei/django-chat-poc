@@ -1,3 +1,4 @@
+from django.db.models.manager import BaseManager
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAdminUser
 
@@ -8,7 +9,7 @@ from .serializers import RoomSerializer
 
 
 class RoomViewSet(viewsets.ModelViewSet):
-    queryset = Room.objects.all()
+    queryset: BaseManager[Room] = Room.objects.all()
     serializer_class = RoomSerializer
     authentication_classes = [BearerTokenAuthentication]
 

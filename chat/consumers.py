@@ -13,20 +13,20 @@ logger = logging.getLogger(__name__)
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
-        self.username = None
+    async def connect(self) -> None:
+        self.room_id: str = self.scope["url_route"]["kwargs"]["room_id"]
+        self.username: str | None = None
 
         # Verificar que la sala con ese ID existe
-        self.room = await self.get_room(self.room_id)
+        self.room: Room | None = await self.get_room(int(self.room_id))
         if not self.room:
             raise DenyConnection()
 
-        self.room_group_name = f"chat_{self.room.id}"
+        self.room_group_name: str = f"chat_{self.room.id}"
 
         await self.accept()
 
-    async def disconnect(self, close_code):
+    async def disconnect(self) -> None:
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         if self.username:
             await remove_user_from_room(self.room_id, self.username)
@@ -39,9 +39,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
     # Receive message from WebSocket
-    async def receive(self, text_data):
-        data = json.loads(text_data)
-        message = data.get("message")
+    async def receive(self, text_data: str) -> None:
+        data: dict = json.loads(text_data)
+        message: str | None = data.get("message")
 
         if not message:
             return
@@ -85,7 +85,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
     # Receive message from room group
-    async def chat_message(self, event):
+    async def chat_message(self, event: dict[str]) -> None:
         await self.send(
             text_data=json.dumps(
                 {
@@ -96,7 +96,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         )
 
-    async def chat_join(self, event):
+    async def chat_join(self, event: dict[str]) -> None:
         await self.send(
             text_data=json.dumps(
                 {
@@ -107,7 +107,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         )
 
-    async def chat_leave(self, event):
+    async def chat_leave(self, event: dict[str]) -> None:
         await self.send(
             text_data=json.dumps(
                 {
@@ -119,7 +119,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     @sync_to_async
-    def get_room(self, room_id):
+    def get_room(self, room_id: int) -> Room | None:
         try:
             return Room.objects.get(id=room_id)
         except Room.DoesNotExist:
