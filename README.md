@@ -90,6 +90,22 @@ La aplicación se comporta distinto según la variable `ENVIRONMENT`. Los valore
 
 - `GET /api/rooms/`: Listar todas las salas (público)
 - `POST /api/rooms/`: Crear una nueva sala (requiere autenticación y permisos de administrador)
+- `PUT /api/rooms/{id}/`: Reemplaza completamente la sala indicada (requiere Bearer token de admin)
+- `PATCH /api/rooms/{id}/`: Actualiza campos parciales de la sala (requiere Bearer token de admin)
+- `DELETE /api/rooms/{id}/`: Elimina la sala (requiere Bearer token de admin)
+
+
+## Funcionalidad de Chat en Tiempo Real (WebSockets)
+
+Se utilizó `Django Channels` para permitir comunicación WebSocket en tiempo real. Redis actúa como broker para las capas de canalización (Channel Layers).
+
+Pasos clave:
+- Se creó la app `chat` con un consumidor asíncrono (`ChatConsumer`)
+- Los usuarios se conectan por WebSocket a una sala: `ws://localhost:8000/ws/chat/<room_name>/`
+- Los mensajes se difunden en tiempo real solo a los usuarios de la misma sala
+- Redis se utiliza para manejar las conexiones concurrentes de los grupos
+
+Los mensajes no se almacenan en base de datos, sólo se transmiten mientras la conexión esté activa.
 
 ## 🔐 Autenticación de administrador (Bearer Token)
 
@@ -97,4 +113,4 @@ Las operaciones de crear, editar y eliminar salas requieren autenticación.
 
 Para obtener un token:
 ```bash
-curl -X POST -d "username=admin&password=admin123" http://localhost:8000/api/token/
+   curl -X POST -d "username=admin&password=admin123" http://localhost:8000/api/token/

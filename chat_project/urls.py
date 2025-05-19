@@ -21,7 +21,11 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework.authtoken.views import obtain_auth_token
 
+from chat import views
+
 urlpatterns = [
+    path('', views.IndexView.as_view(), name='index'),
+    path('chat/<int:room_id>/', views.ChatRoomView.as_view(), name='chat_room'),
     path("api/", include("rooms.urls")),
     path("api/token/", obtain_auth_token, name="api_token_auth"),
 ]

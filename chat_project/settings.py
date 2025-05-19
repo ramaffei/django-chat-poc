@@ -22,19 +22,18 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT", "Local")
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
+REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+REDIS_URL = f"redis://{REDIS_HOST}:6379/0"
+
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
 
 STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(
-    BASE_DIR, "staticfiles"
-)
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Si querés servirlos en desarrollo:
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -42,6 +41,7 @@ STATICFILES_DIRS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "channels",
     "rooms",
+    "chat",
 ]
 
 MIDDLEWARE = [
@@ -73,7 +74,7 @@ ROOT_URLCONF = "chat_project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -84,9 +85,6 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = "chat_project.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -140,19 +138,20 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOW_ALL_ORIGINS = True
 
-ASGI_APPLICATION = "chat_project.asgi.application"
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("redis", 6379)],
-        },
-    },
-}
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
 }
+
+# Redis backend para Channel Layers
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(REDIS_HOST, 6379)],
+        },
+    },
+}
+
+ASGI_APPLICATION = "chat_project.asgi.application"

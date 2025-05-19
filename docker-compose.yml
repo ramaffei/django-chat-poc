@@ -24,10 +24,9 @@ services:
   app:
     build: .
     container_name: django-docker
-    command: bash -c "daphne -b 0.0.0.0 -p 8000 chat_project.asgi:application"
+    command: bash -c "python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
-      - /app/staticfiles
     ports:
       - "8000:8000"
     depends_on:
@@ -37,6 +36,7 @@ services:
         condition: service_started
     environment:
       POSTGRES_HOST: db
+      REDIS_HOST: redis
     env_file:
       - .env
 
